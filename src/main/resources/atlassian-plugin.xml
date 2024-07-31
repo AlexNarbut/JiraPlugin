@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<atlassian-plugin key="${atlassian.plugin.key}" name="${project.name}" plugins-version="2"> 
+  <plugin-info> 
+    <description>${project.description}</description>  
+    <version>${project.version}</version>  
+    <vendor name="${project.organization.name}" url="${project.organization.url}"/>  
+    <param name="plugin-icon">images/pluginIcon.png</param>  
+    <param name="plugin-logo">images/pluginLogo.png</param> 
+  </plugin-info>  
+  <!-- add our i18n resource -->  
+  <resource type="i18n" name="i18n" location="conflplug"/>  
+
+
+  <!-- add our web resources -->  
+  <web-resource key="conflplug-resources" name="conflplug Web Resources"> 
+    <dependency>com.atlassian.auiplugin:ajs</dependency>  
+    <resource type="download" name="conflplug.css" location="/css/conflplug.css"/>  
+    <resource type="download" name="conflplug.js" location="/js/conflplug.js"/>  
+    <resource type="download" name="images/" location="/images"/>  
+    <context>conflplug</context> 
+  </web-resource>
+
+
+  <servlet name="Ai Servlet" i18n-name-key="ai-servlet.name" key="ai-servlet" class="conflplug.servlet.AiServlet">
+    <description key="ai-servlet.description">The Ai Servlet Plugin</description>
+    <url-pattern>/aiservlet</url-pattern>
+  </servlet>
+
+  <routing key="ai-form-url-key" path="/secure">
+    <route from="/AiServlet.jspa" to="/plugins/servlet/aiservlet"/>
+  </routing>
+</atlassian-plugin>
