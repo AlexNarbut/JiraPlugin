@@ -41,6 +41,7 @@ public class AiServlet extends HttpServlet {
 
     private final String QUESTION_PARAM_KEY = "question";
     private final String ANSWER_PARAM_KEY = "answer";
+    private final String TIME_PARAM_KEY = "time";
 
     private final String CHAT_GBT_API_URL = "https://api.chatgpt.com/v1/converse";
     private final String CHAT_GBT_API_KEY = "sk-proj-dZ02qE2fynGpdNfUPPa7T3BlbkFJYyAJPZF5wpeHtW7rPWG9";
@@ -72,6 +73,9 @@ public class AiServlet extends HttpServlet {
         Map<String, Object> context = Maps.newHashMap();
         String question = req.getParameter(QUESTION_PARAM_KEY);
         if (question != null) {
+            String time = requestTime();
+            context.put(TIME_PARAM_KEY, time);
+
             String answer = askChatGbt(question);
             context.put(ANSWER_PARAM_KEY, answer);
         }
@@ -123,34 +127,33 @@ public class AiServlet extends HttpServlet {
         }
         return defaultError;
     }
+
+    private final String urlString = "http://www.google.com"; // URL запроса
+
+    private String requestTime() {
+        String answer = "System request failed";
+        try {
+            // Создание объекта URL
+            URL url = new URL(urlString);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
+            // Настройка метода запроса
+            connection.setRequestMethod("GET");
+            connection.setRequestProperty("User-Agent", "Mozilla/5.0");
+
+            // Получение ответа
+            int responseCode = connection.getResponseCode();
+            System.out.println("Response Code: " + responseCode);
+
+            // Проверка успешного ответа
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                String dateHeader = connection.getHeaderField("Date");
+                answer = dateHeader != null ? dateHeader : answer;
+
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return answer;
+    }
 }
-
-
-//    private final String urlString = "http://www.google.com"; // URL запроса
-//
-//    private String getGoogleSystemTime(){
-//        String answer = "System request failed";
-//        try {
-//            // Создание объекта URL
-//            URL url = new URL(urlString);
-//            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-//
-//            // Настройка метода запроса
-//            connection.setRequestMethod("GET");
-//            connection.setRequestProperty("User-Agent", "Mozilla/5.0");
-//
-//            // Получение ответа
-//            int responseCode = connection.getResponseCode();
-//            System.out.println("Response Code: " + responseCode);
-//
-//            // Проверка успешного ответа
-//            if (responseCode == HttpURLConnection.HTTP_OK) {
-//                String dateHeader = connection.getHeaderField("Date");
-//                answer = dateHeader != null ? dateHeader : answer;
-//
-//            }
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        return  answer;
-//    }
