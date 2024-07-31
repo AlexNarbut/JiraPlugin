@@ -1,0 +1,20 @@
+<html>
+<head>
+    <title>MyServlet Admin</title>
+    <meta name="decorator" content="atl.admin">
+</head>
+<body>
+<form id="admin" class="aui" action="" method="POST">
+    <div class="field-group">
+        <label for="Test">Ask question</label>
+        <input type="text" id="question" name="question" class="text" value="$question">
+    </div>
+    <div class="field-group">
+        <input type="submit" value="Send" class="button">
+    </div>
+</form>
+    #if ($answer != "")
+    <p>System Time: $answer</p>
+    #end
+</body>
+</html>
