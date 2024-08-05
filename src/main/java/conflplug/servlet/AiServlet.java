@@ -1,12 +1,14 @@
 package conflplug.servlet;
 
-import com.atlassian.jira.util.json.JSONException;
-import com.atlassian.jira.util.json.JSONObject;
 import com.atlassian.plugin.spring.scanner.annotation.component.Scanned;
 import com.atlassian.plugin.spring.scanner.annotation.imports.ComponentImport;
 import com.atlassian.templaterenderer.TemplateRenderer;
 import com.atlassian.webresource.api.assembler.PageBuilderService;
 import com.google.common.collect.Maps;
+import conflplug.chatGbt.model.completion.ChatCompletion;
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,10 +18,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.URL;
 import java.util.Map;
 
@@ -30,6 +29,7 @@ import java.net.HttpURLConnection;
 @Named("AiServlet")
 public class AiServlet extends HttpServlet {
     private static final Logger log = LoggerFactory.getLogger(AiServlet.class);
+
 
     @ComponentImport
     private final TemplateRenderer templateRenderer;
@@ -43,9 +43,11 @@ public class AiServlet extends HttpServlet {
     private final String ANSWER_PARAM_KEY = "answer";
     private final String TIME_PARAM_KEY = "time";
 
-    private final String CHAT_GBT_API_URL = "https://api.chatgpt.com/v1/converse";
-    private final String CHAT_GBT_API_KEY = "sk-proj-dZ02qE2fynGpdNfUPPa7T3BlbkFJYyAJPZF5wpeHtW7rPWG9";
+    private final String CHAT_GBT_API_URL = "https://api.openai.com/v1/chat/completions";
+    private final String CHAT_GBT_API_KEY = "sk-t9XwSQ1eisTtcNpPvTgZt5PXMqOMr_bKotWTKrJId3T3BlbkFJjJvXmLAJ_xP1E3F2iqak7_BqufbNlK8QcpSAC8xvAA";
+    private final String GBT_MODEL = "gpt-3.5-turbo";
 
+    private final ObjectMapper jsonMapper = new ObjectMapper();
 
     @Inject
     public AiServlet(TemplateRenderer templateRenderer, PageBuilderService pageBuilderService) {
@@ -90,41 +92,54 @@ public class AiServlet extends HttpServlet {
         String defaultError = "An error has occurred";
         String jsonError = "Data is not recognized";
         try {
-            URL url = new URL(CHAT_GBT_API_URL);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-
+            URL obj = new URL(CHAT_GBT_API_URL);
+            HttpURLConnection connection = (HttpURLConnection) obj.openConnection();
             connection.setRequestMethod("POST");
             connection.setRequestProperty("Authorization", "Bearer " + CHAT_GBT_API_KEY);
             connection.setRequestProperty("Content-Type", "application/json");
-            String requestBody = "{\"question\":\"" + question + "\"}";
 
+            // The request body
+            String json = "{\"model\": \"" + GBT_MODEL + "\", \"messages\": [{\"role\": \"user\", \"content\": \"" + question + "\"}]}";
             connection.setDoOutput(true);
-            OutputStream outputStream = connection.getOutputStream();
-            outputStream.write(requestBody.getBytes());
-            outputStream.close();
+            OutputStreamWriter writer = new OutputStreamWriter(connection.getOutputStream());
+            writer.write(json);
+            writer.flush();
+            writer.close();
+
 
             int responseCode = connection.getResponseCode();
-            System.out.println("Response status: " + responseCode);
+            System.out.println("POST Response Code :: " + responseCode);
 
-            if (responseCode == 200) {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                StringBuilder responseBody = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    responseBody.append(line);
+            if (responseCode == HttpURLConnection.HTTP_OK) { // success
+// Response from ChatGPT
+                BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                String inputLine;
+                StringBuffer response = new StringBuffer();
+
+                while ((inputLine = in.readLine()) != null) {
+                    response.append(inputLine);
                 }
-                reader.close();
+                in.close();
 
-                JSONObject jsonObject = new JSONObject(responseBody.toString());
-                return jsonObject.getString("answer");
+                ChatCompletion completion = jsonMapper.readValue(response.toString(), ChatCompletion.class);
+
+                StringBuilder builder = new StringBuilder();
+                ChatCompletion.Choice[] choices = completion.getChoices();
+                for (ChatCompletion.Choice choice : choices) {
+                    builder.append(choice.getMessage().getContent()).append("\n");
+                }
+                return builder.toString();
             } else {
-                return defaultError + " (" + connection.getResponseMessage() + ")";
+                return defaultError + " (Response code: " + responseCode + ")";
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
-            return jsonError;
         }
+        catch (JsonParseException | JsonMappingException e) {
+            return jsonError + (e.getCause() != null ? "(" +e.getCause().toString() + ")" : "");
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+
         return defaultError;
     }
 
