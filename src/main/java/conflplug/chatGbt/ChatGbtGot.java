@@ -56,7 +56,7 @@ public class ChatGbtGot {
     private final String CHAT_GBT_SUMMARIZATION_URL = CHAT_GBT_BASE_URL + "summarization";
     private final String CHAT_GBT_FILE_ASSISTANCE_URL = CHAT_GBT_BASE_URL + "files";
 
-    private final String CHAT_GBT_API_KEY = "sk-t9XwSQ1eisTtcNpPvTgZt5PXMqOMr_bKotWTKrJId3T3BlbkFJjJvXmLAJ_xP1E3F2iqak7_BqufbNlK8QcpSAC8xvAA";
+    private final String CHAT_GBT_API_KEY = "API-KEY";
     private final String GBT_3_5_MODEL = "gpt-3.5-turbo";
     private final String GBT_4_1106_MODEL = "gpt-4-1106-preview";
     private final String GBT_TEXT_DAVINCI_MODEL = "text-davinci-003";
