@@ -1,35 +1,35 @@
 package conflplug.chatGbt.model.completion;
 
+import com.google.gson.annotations.SerializedName;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.codehaus.jackson.annotate.JsonProperty;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
 public class ChatCompletion {
-    @JsonProperty("id")
+    @SerializedName("id")
     private String id;
 
-    @JsonProperty("object")
+    @SerializedName("object")
     private String object;
 
-    @JsonProperty("created")
+    @SerializedName("created")
     private long created;
 
-    @JsonProperty("model")
+    @SerializedName("model")
     private String model;
 
-    @JsonProperty("choices")
+    @SerializedName("choices")
     private Choice[] choices;
 
-    @JsonProperty("usage")
+    @SerializedName("usage")
     private Choice.Usage usage;
 
-    @JsonProperty("system_fingerprint")
+    @SerializedName("system_fingerprint")
     private String systemFingerprint;
 
     @AllArgsConstructor
@@ -37,16 +37,16 @@ public class ChatCompletion {
     @Getter
     @Setter
     public static class Choice {
-        @JsonProperty("index")
+        @SerializedName("index")
         private int index;
 
-        @JsonProperty("message")
+        @SerializedName("message")
         private Message message;
 
-        @JsonProperty("logprobs")
+        @SerializedName("logprobs")
         private String logprobs;
 
-        @JsonProperty("finish_reason")
+        @SerializedName("finish_reason")
         private String finishReason;
 
         @AllArgsConstructor
@@ -54,9 +54,9 @@ public class ChatCompletion {
         @Getter
         @Setter
         public static class Message {
-            @JsonProperty("role")
+            @SerializedName("role")
             private String role;
-            @JsonProperty("content")
+            @SerializedName("content")
             private String content;
         }
 
@@ -65,11 +65,11 @@ public class ChatCompletion {
         @Getter
         @Setter
         public static class Usage {
-            @JsonProperty("prompt_tokens")
+            @SerializedName("prompt_tokens")
             private int promptTokens;
-            @JsonProperty("completion_tokens")
+            @SerializedName("completion_tokens")
             private int completionTokens;
-            @JsonProperty("total_tokens")
+            @SerializedName("total_tokens")
             private int totalTokens;
         }
     }

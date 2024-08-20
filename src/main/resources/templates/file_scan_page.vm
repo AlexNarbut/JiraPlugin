@@ -1,0 +1,14 @@
+<html>
+<head>
+    <title>File Scan</title>
+    <meta name="decorator" content="atl.admin">
+</head>
+<body>
+<form id="admin" class="aui" action="" method="POST">
+    <input type='file' id='fileInput' name='fileInput' value="$fileInput"/>
+    <div class="field-group">
+        <input type="submit" value="Send" class="button">
+    </div>
+</form>
+</body>
+</html>

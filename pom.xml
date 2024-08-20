@@ -1,23 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.syncra</groupId>
     <artifactId>conflplug</artifactId>
     <version>1.0.0</version>
-
     <organization>
         <name>Example Company</name>
         <url>http://www.example.com/</url>
     </organization>
-
     <name>conflplug</name>
     <description>This is the com.syncra:conflplug plugin for Atlassian JIRA.</description>
     <packaging>atlassian-plugin</packaging>
-
     <properties>
         <jira.version>9.6.0</jira.version>
         <amps.version>8.0.2</amps.version>
@@ -36,7 +30,6 @@
         <ao.version>3.2.9</ao.version>
         <slfj.version>1.7.30</slfj.version>
     </properties>
-
     <dependencies>
         <dependency>
             <groupId>com.atlassian.jira</groupId>
@@ -44,11 +37,52 @@
             <version>${jira.version}</version>
             <scope>provided</scope>
         </dependency>
-
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
             <version>5.3.29</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.theokanning.openai-gpt3-java</groupId>
+            <artifactId>api</artifactId>
+            <version>0.18.2</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.theokanning.openai-gpt3-java</groupId>
+            <artifactId>client</artifactId>
+            <version>0.18.2</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.theokanning.openai-gpt3-java</groupId>
+            <artifactId>service</artifactId>
+            <version>0.18.2</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.retrofit2</groupId>
+            <artifactId>retrofit</artifactId>
+            <version>2.9.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.14</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpmime</artifactId>
+            <version>4.5.14</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.10.1</version>
             <scope>provided</scope>
         </dependency>
         <!-- For Jira 8/9 compatibility-->
@@ -58,15 +92,12 @@
             <version>1.0.0</version>
             <scope>provided</scope>
         </dependency>
-
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.10</version>
             <scope>test</scope>
         </dependency>
-
-
         <dependency>
             <groupId>com.atlassian.jira</groupId>
             <artifactId>jira-tests</artifactId>
@@ -91,7 +122,6 @@
             <version>${atlassian.spring.scanner.version}</version>
             <scope>runtime</scope>
         </dependency>
-
         <dependency>
             <groupId>com.atlassian.templaterenderer</groupId>
             <artifactId>atlassian-template-renderer-api</artifactId>
@@ -127,7 +157,6 @@
             <artifactId>commons-logging</artifactId>
             <version>1.2</version>
         </dependency>
-
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
@@ -177,8 +206,13 @@
             <version>${slfj.version}</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+            <version>2.4</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
-
     <build>
         <plugins>
             <plugin>
@@ -202,10 +236,7 @@
                         <!-- Add package to export here -->
                         <Export-Package>conflplug.api,</Export-Package>
                         <!-- Add package import here -->
-                        <Import-Package>org.springframework.osgi.*;resolution:="optional",
-                            org.eclipse.gemini.blueprint.*;resolution:="optional", *;
-                            *;resolution:="optional"
-                        </Import-Package>
+                        <Import-Package>org.springframework.osgi.*;resolution:="optional", org.eclipse.gemini.blueprint.*;resolution:="optional", *; *;resolution:="optional"</Import-Package>
                         <!-- Ensure plugin is spring powered -->
                         <Spring-Context>*</Spring-Context>
                     </instructions>
@@ -235,5 +266,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>

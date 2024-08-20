@@ -5,10 +5,11 @@ import com.atlassian.plugin.spring.scanner.annotation.imports.ComponentImport;
 import com.atlassian.templaterenderer.TemplateRenderer;
 import com.atlassian.webresource.api.assembler.PageBuilderService;
 import com.google.common.collect.Maps;
+import conflplug.chatGbt.ChatGbtGot;
 import conflplug.chatGbt.model.completion.ChatCompletion;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
+import conflplug.chatGbt.model.response.ErrorResponse;
+import conflplug.chatGbt.model.response.Response;
+import conflplug.chatGbt.model.response.SuccessResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,11 +44,10 @@ public class AiServlet extends HttpServlet {
     private final String ANSWER_PARAM_KEY = "answer";
     private final String TIME_PARAM_KEY = "time";
 
-    private final String CHAT_GBT_API_URL = "https://api.openai.com/v1/chat/completions";
-    private final String CHAT_GBT_API_KEY = "sk-t9XwSQ1eisTtcNpPvTgZt5PXMqOMr_bKotWTKrJId3T3BlbkFJjJvXmLAJ_xP1E3F2iqak7_BqufbNlK8QcpSAC8xvAA";
-    private final String GBT_MODEL = "gpt-3.5-turbo";
+    private final String defaultError = "An error has occurred";
+    private final String jsonError = "Data is not recognized";
 
-    private final ObjectMapper jsonMapper = new ObjectMapper();
+    private String chatId;
 
     @Inject
     public AiServlet(TemplateRenderer templateRenderer, PageBuilderService pageBuilderService) {
@@ -57,13 +57,6 @@ public class AiServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // loading web resources(css,js)
-//        this.pageBuilderService
-//                .assembler()
-//                .resources()
-//                .requireWebResource("custom-jira-report:test-resource");
-
-        // map for parameters
         Map<String, Object> context = Maps.newHashMap();
 
         response.setContentType(HTML_CONTENT_TYPE);
@@ -78,69 +71,29 @@ public class AiServlet extends HttpServlet {
             String time = requestTime();
             context.put(TIME_PARAM_KEY, time);
 
-            String answer = askChatGbt(question);
-            context.put(ANSWER_PARAM_KEY, answer);
+            Response<ChatCompletion> answer = ChatGbtGot.getInstance().askQuestion(chatId, question, defaultError, jsonError);
+
+            if (answer instanceof SuccessResponse) {
+                ChatCompletion chatCompletion = answer.getValue();
+
+                chatId = chatCompletion.getId();
+
+                StringBuilder builder = new StringBuilder();
+                ChatCompletion.Choice[] choices = chatCompletion.getChoices();
+                for (ChatCompletion.Choice choice : choices) {
+                    builder.append(choice.getMessage().getContent()).append("\n");
+                }
+                context.put(ANSWER_PARAM_KEY, builder.toString());
+            } else if (answer instanceof ErrorResponse) {
+                chatId = null;
+                context.put(ANSWER_PARAM_KEY, ((ErrorResponse<ChatCompletion>) answer).getMessage());
+            }
         }
 
         context.put(QUESTION_PARAM_KEY, question);
 
         resp.setContentType(HTML_CONTENT_TYPE);
         templateRenderer.render(MAIN_TEMPLATE, context, resp.getWriter());
-    }
-
-    private String askChatGbt(String question) {
-        String defaultError = "An error has occurred";
-        String jsonError = "Data is not recognized";
-        try {
-            URL obj = new URL(CHAT_GBT_API_URL);
-            HttpURLConnection connection = (HttpURLConnection) obj.openConnection();
-            connection.setRequestMethod("POST");
-            connection.setRequestProperty("Authorization", "Bearer " + CHAT_GBT_API_KEY);
-            connection.setRequestProperty("Content-Type", "application/json");
-
-            // The request body
-            String json = "{\"model\": \"" + GBT_MODEL + "\", \"messages\": [{\"role\": \"user\", \"content\": \"" + question + "\"}]}";
-            connection.setDoOutput(true);
-            OutputStreamWriter writer = new OutputStreamWriter(connection.getOutputStream());
-            writer.write(json);
-            writer.flush();
-            writer.close();
-
-
-            int responseCode = connection.getResponseCode();
-            System.out.println("POST Response Code :: " + responseCode);
-
-            if (responseCode == HttpURLConnection.HTTP_OK) { // success
-// Response from ChatGPT
-                BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                String inputLine;
-                StringBuffer response = new StringBuffer();
-
-                while ((inputLine = in.readLine()) != null) {
-                    response.append(inputLine);
-                }
-                in.close();
-
-                ChatCompletion completion = jsonMapper.readValue(response.toString(), ChatCompletion.class);
-
-                StringBuilder builder = new StringBuilder();
-                ChatCompletion.Choice[] choices = completion.getChoices();
-                for (ChatCompletion.Choice choice : choices) {
-                    builder.append(choice.getMessage().getContent()).append("\n");
-                }
-                return builder.toString();
-            } else {
-                return defaultError + " (Response code: " + responseCode + ")";
-            }
-        }
-        catch (JsonParseException | JsonMappingException e) {
-            return jsonError + (e.getCause() != null ? "(" +e.getCause().toString() + ")" : "");
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return defaultError;
     }
 
     private final String urlString = "http://www.google.com"; // URL запроса

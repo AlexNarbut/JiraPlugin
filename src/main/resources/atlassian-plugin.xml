@@ -10,8 +10,6 @@
   </plugin-info>  
   <!-- add our i18n resource -->  
   <resource type="i18n" name="i18n" location="conflplug"/>  
-
-
   <!-- add our web resources -->  
   <web-resource key="conflplug-resources" name="conflplug Web Resources"> 
     <dependency>com.atlassian.auiplugin:ajs</dependency>  
@@ -19,15 +17,23 @@
     <resource type="download" name="conflplug.js" location="/js/conflplug.js"/>  
     <resource type="download" name="images/" location="/images"/>  
     <context>conflplug</context> 
-  </web-resource>
-
+  </web-resource>  
 
   <servlet name="Ai Servlet" i18n-name-key="ai-servlet.name" key="ai-servlet" class="conflplug.servlet.AiServlet">
-    <description key="ai-servlet.description">The Ai Servlet Plugin</description>
-    <url-pattern>/aiservlet</url-pattern>
+    <description key="ai-servlet.description">The Ai Servlet</description>  
+    <url-pattern>/aiservlet</url-pattern> 
+  </servlet>  
+  <routing key="ai-form-url-key" path="/secure"> 
+    <route from="/AiServlet.jspa" to="/plugins/servlet/aiservlet"/> 
+  </routing>
+
+
+  <servlet name="File Scan Servlet" i18n-name-key="file-scan-servlet.name" key="file-scan-servlet" class="conflplug.servlet.FileScanServlet"> 
+    <description key="file-scan-servlet.description">The File Scan Servlet Plugin</description>  
+    <url-pattern>/filescanservlet</url-pattern> 
   </servlet>
 
-  <routing key="ai-form-url-key" path="/secure">
-    <route from="/AiServlet.jspa" to="/plugins/servlet/aiservlet"/>
+  <routing key="file-scan-url-key" path="/secure">
+    <route from="/FileScanServlet.jspa" to="/plugins/servlet/filescanservlet"/>
   </routing>
 </atlassian-plugin>
